@@ -1,131 +1,112 @@
 grammar IntFlex;
 
+@header {
+import ru.rofleksey.intflex.expr.*;
+import java.util.ArrayList;
+}
+
+@parser::members {
+        public ArrayList<RangeDeclaration> ranges = new ArrayList<>();
+        public ArrayList<ExpressionDeclaration> calcs = new ArrayList<>();
+        public ArrayList<Show> shows = new ArrayList<>();
+        int showNum = 0;
+}
+
 main
-    :   statementList? EOF
+    :   statementList EOF
     ;
 
 statementList
-    :   statement
-    |   statementList statement
+    :   declaration
+    |   statementList declaration
     ;
 
-statement
-    :   assignmentExpression
+declaration
+    : rangeDeclaration
+    | expressionDeclaration
+    | showDeclaration
     ;
 
-primaryExpression
-    :   e1=Identifier
-    |   e1=Constant
-    |   e1=StringLiteral+
-    |   '(' assignmentExpression ')'
+showDeclaration
+    :  At name=Identifier {shows.add(new Show($name.text, showNum++));}
     ;
 
-postfixExpression
-    :   primaryExpression
-    |   postfixExpression '(' argumentExpressionList? ')'
-    |   postfixExpression '.' Identifier
+expressionDeclaration
+    :  name=Identifier FlexAssign e2=additiveExpression {calcs.add(new ExpressionDeclaration($name.text, $e2.expr));}
     ;
 
-argumentExpressionList
-    :   assignmentExpression #assListNextLevel
-    |   e1=argumentExpressionList t1=Comma e2=assignmentExpression #assList1
+rangeDeclaration
+    : name=Identifier FlexAssign r=range {ranges.add(new RangeDeclaration($name.text, $r.r));}
     ;
 
-unaryExpression
-    :   postfixExpression
-    |   unaryOperator unaryExpression
+range returns [Range r]
+    : from=additiveExpression Dots to=additiveExpression Comma step=additiveExpression {$r = new Range($from.expr, $to.expr, $step.expr);}
+    | from=additiveExpression Dots to=additiveExpression {$r = new Range($from.expr, $to.expr);}
     ;
 
-unaryOperator
-    :   e=Plus | e=Minus | e=Not
+primaryExpression returns [Expression expr]
+    :   e1=Identifier {$expr = new Var($e1.text);}
+    |   e1=Constant {$expr = new Constant($e1.text);}
+    |   '(' a=additiveExpression ')' {$expr = $a.expr;}
     ;
 
-multiplicativeExpression
-    :   unaryExpression #multNext
-    |   e1=multiplicativeExpression op=Star e2=unaryExpression #multOp
-    |   e1=multiplicativeExpression op=Div e2=unaryExpression #multOp
-    |   e1=multiplicativeExpression op=Mod e2=unaryExpression #multOp
+postfixExpression returns [Expression expr]
+    :   p=primaryExpression {$expr = $p.expr;}
+    |   what=postfixExpression '(' args=argumentExpressionList ')' {$expr = new FunctionCall($what.expr, $args.args);}
+    |   what=postfixExpression '(' ')' {$expr = new FunctionCall($what.expr);}
+    //|   what=postfixExpression '.' Identifier {$expr = new MemberGet($what.expr);}
+    |   what=postfixExpression '!' {$expr = new Factorial($what.expr);}
     ;
 
-additiveExpression
-    :   multiplicativeExpression #addNext
-    |   e1=additiveExpression op=Plus e2=multiplicativeExpression #addOp
-    |   e1=additiveExpression op=Minus e2=multiplicativeExpression #addOp
+argumentExpressionList returns [ArrayList<Expression> args]
+    :   a=additiveExpression {$args = new ArrayList<>(); $args.add($a.expr);}
+    |   e1=argumentExpressionList t1=Comma e2=additiveExpression {$e1.args.add($e2.expr);}
     ;
 
-relationalExpression
-    :   additiveExpression #relNext
-    |   e1=relationalExpression op=Less e2=additiveExpression #relOp
-    |   e1=relationalExpression op=Greater e2=additiveExpression #relOp
-    |   e1=relationalExpression op=LessEqual e2=additiveExpression #relOp
-    |   e1=relationalExpression op=GreaterEqual e2=additiveExpression #relOp
+unaryExpression returns [Expression expr]
+    :   p=postfixExpression {$expr = $p.expr;}
+    |   Minus u=unaryExpression {$expr = new UnaryMinus($u.expr);}
     ;
 
-equalityExpression
-    :   relationalExpression #eqNext
-    |   e1=equalityExpression op=Equal e2=relationalExpression #eqOp
-    |   e1=equalityExpression op=NotEqual e2=relationalExpression #eqOp
+powerExpression returns [Expression expr]
+    :   u=unaryExpression {$expr = $u.expr;}
+    |   e1=unaryExpression op=Pow e2=powerExpression {$expr = new Power($e1.expr, $e2.expr);}
     ;
 
-logicalAndExpression
-    :   equalityExpression #andNext
-    |   e1=logicalAndExpression op=AndAnd e2=equalityExpression #andOp
+multiplicativeExpression returns [Expression expr]
+    :   p=powerExpression {$expr = $p.expr;}
+    |   e1=multiplicativeExpression op=Star e2=powerExpression {$expr = new Multiply($e1.expr, $e2.expr);}
+    |   e1=multiplicativeExpression op=Div e2=powerExpression {$expr = new Divide($e1.expr, $e2.expr);}
+    |   e1=multiplicativeExpression op=Mod e2=powerExpression {$expr = new Remainder($e1.expr, $e2.expr);}
     ;
 
-logicalOrExpression
-    :   logicalAndExpression #orNext
-    |   e1=logicalOrExpression op=OrOr e2=logicalAndExpression #orOp
+additiveExpression returns [Expression expr]
+    :   m=multiplicativeExpression {$expr = $m.expr;}
+    |   e1=additiveExpression op=Plus e2=multiplicativeExpression {$expr = new Add($e1.expr, $e2.expr);}
+    |   e1=additiveExpression op=Minus e2=multiplicativeExpression {$expr = new Subtract($e1.expr, $e2.expr);}
     ;
 
-assignmentExpression
-    :   logicalOrExpression #assExprNextLevel
-    |   e1=unaryExpression op=assignmentOperator e2=assignmentExpression #assExpr1
-    //|   DigitSequence
-    ;
 
-assignmentOperator
-    :   Assign | StarAssign | DivAssign | ModAssign | PlusAssign | MinusAssign
-    ;
-
+At : '@';
+Dots: '..';
+Factorial: '!';
+//Dot: '.';
 
 LeftParen : '(';
 RightParen : ')';
 LeftBracket : '[';
 RightBracket : ']';
-LeftBrace : '{';
-RightBrace : '}';
-
-Less : '<';
-LessEqual : '<=';
-Greater : '>';
-GreaterEqual : '>=';
 
 
 Plus : '+';
 Minus : '-';
 Star : '*';
+Pow : '^';
 Div : '/';
 Mod : '%';
-
-AndAnd : '&&';
-OrOr : '||';
-Not : '!';
-
-Colon : ':';
-Semi : ';';
 Comma : ',';
 
-Assign : '=';
 FlexAssign: ':=';
-// '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
-StarAssign : '*=';
-DivAssign : '/=';
-ModAssign : '%=';
-PlusAssign : '+=';
-MinusAssign : '-=';
-
-Equal : '==';
-NotEqual : '!=';
 
 Identifier
     :   IdentifierNondigit
@@ -141,7 +122,7 @@ IdentifierNondigit
 
 fragment
 Nondigit
-    :   [a-zA-Z_]
+    :   [a-zA-Z]
     ;
 
 fragment
@@ -173,8 +154,7 @@ NonzeroDigit
 
 fragment
 FractionalConstant
-    :   DigitSequence? '.' DigitSequence
-    |   DigitSequence '.'
+    :   DigitSequence '.' DigitSequence
     ;
 
 fragment
