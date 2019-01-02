@@ -9,7 +9,7 @@ import ru.rofleksey.intflex.runtime.type.IntFlexObject;
 
 public class IntFlexContext {
     final ArrayList<Declaration> execOrder;
-    HashMap<String, IntFlexObject> calcs = new HashMap<>();
+    HashMap<String, IntFlexObject> calcs = new HashMap<>(), system = new HashMap<>();
     Result result = new Result();
     int execIter = 0;
 
@@ -23,6 +23,8 @@ public class IntFlexContext {
     public IntFlexObject get(String name) throws IntFlexError {
         if (calcs.containsKey(name)) {
             return calcs.get(name);
+        } else if (system.containsKey(name)) {
+            return system.get(name);
         } else {
             throw new IntFlexError("IntFlexContext.get() failed");
         }
@@ -30,6 +32,10 @@ public class IntFlexContext {
 
     public void put(String name, IntFlexObject o) {
         calcs.put(name, o);
+    }
+
+    public void putSys(String name, IntFlexObject o) {
+        system.put(name, o);
     }
 
     public void addToResult(IntFlexObject o) {

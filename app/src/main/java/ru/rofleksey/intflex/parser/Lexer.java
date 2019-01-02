@@ -42,7 +42,7 @@ public class Lexer {
     }
 
     private boolean isSkipChar() {
-        return !eof && Character.isWhitespace(input.charAt(curPos));
+        return !eof && Character.isWhitespace(input.charAt(curPos)) && '\n' != input.charAt(curPos);
     }
 
     private Token nextToken() throws ParseException {
@@ -75,7 +75,8 @@ public class Lexer {
                     new TokenMatcher(TokenType.LB, "(", false),
                     new TokenMatcher(TokenType.RB, ")", false),
                     new TokenMatcher(TokenType.AT, "@", false),
-                    new TokenMatcher(TokenType.POTENTIAL, "~", false),
+                    new TokenMatcher(TokenType.LINE_BREAK, "\n", false),
+                    new TokenMatcher(TokenType.POTENTIAL, "_", false),
                     new TokenMatcher(TokenType.COMMA, ",", false),
                     new TokenMatcher(TokenType.PLUS, "+", false),
                     new TokenMatcher(TokenType.MINUS, "-", false),
@@ -85,7 +86,7 @@ public class Lexer {
                     new TokenMatcher(TokenType.POW, "^", false),
                     new TokenMatcher(TokenType.DOTS, "..", false),
                     new TokenMatcher(TokenType.FACTORIAL, "!", false),
-                    new TokenMatcher(TokenType.ASSIGNFLEX, ":=", false),
+                    new TokenMatcher(TokenType.ASSIGN_FLEX, ":=", false),
                     new TokenMatcher(TokenType.NUMBER, "\\d+(\\.\\d+)?", true),
                     new TokenMatcher(TokenType.IDENTIFIER, "[a-zA-Z][a-zA-Z0-9]*", true),
             };

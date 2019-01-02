@@ -28,7 +28,7 @@ public class Parser {
     private List<Token> tokens;
     private int curToken = 0;
     private int showNum = 0;
-    private boolean lastWasRangeWithoutStep = false, lastWasSimple = false;
+    private boolean lastWasRangeWithoutStep = false, lastWasSimple = false, lastWasShow;
 
     public Parser(String input) {
         this.input = input;
@@ -38,7 +38,7 @@ public class Parser {
     }
 
     public static Parser getNext(String input) {
-        return new Parser(input + "~");
+        return new Parser(input + "_");
     }
 
     public void parse() throws ParseException {
@@ -47,17 +47,22 @@ public class Parser {
         while (!curIs(TokenType.EOF)) {
             decl();
             if (lastWasRangeWithoutStep) {
-                expected(TokenType.EOF, TokenType.AT, TokenType.IDENTIFIER,
+                expected(TokenType.EOF, TokenType.LINE_BREAK,
                         TokenType.MINUS, TokenType.PLUS, TokenType.MULT,
-                        TokenType.DIV, TokenType.MOD, TokenType.FACTORIAL, TokenType.LB, TokenType.COMMA);
+                        TokenType.DIV, TokenType.MOD, TokenType.POW, TokenType.FACTORIAL, TokenType.LB, TokenType.COMMA);
             } else if (lastWasSimple) {
-                expected(TokenType.EOF, TokenType.AT, TokenType.IDENTIFIER,
+                expected(TokenType.EOF, TokenType.LINE_BREAK,
                         TokenType.MINUS, TokenType.PLUS, TokenType.MULT,
-                        TokenType.DIV, TokenType.MOD, TokenType.FACTORIAL, TokenType.LB, TokenType.DOTS);
+                        TokenType.DIV, TokenType.MOD, TokenType.POW, TokenType.FACTORIAL, TokenType.LB, TokenType.DOTS);
+            } else if (lastWasShow) {
+                expected(TokenType.EOF, TokenType.LINE_BREAK);
             } else {
-                expected(TokenType.EOF, TokenType.AT, TokenType.IDENTIFIER,
+                expected(TokenType.EOF, TokenType.LINE_BREAK,
                         TokenType.MINUS, TokenType.PLUS, TokenType.MULT,
-                        TokenType.DIV, TokenType.MOD, TokenType.FACTORIAL, TokenType.LB);
+                        TokenType.DIV, TokenType.MOD, TokenType.POW, TokenType.FACTORIAL, TokenType.LB);
+            }
+            if (!curIs(TokenType.EOF)) {
+                skipForce(TokenType.LINE_BREAK);
             }
         }
     }
@@ -96,14 +101,16 @@ public class Parser {
     private void decl() throws ParseException {
         lastWasRangeWithoutStep = false;
         lastWasSimple = false;
+        lastWasShow = false;
         expected(TokenType.AT, TokenType.IDENTIFIER);
         if (skip(TokenType.AT)) {
+            lastWasShow = true;
             shows.add(show());
             return;
         }
         skipForce(TokenType.IDENTIFIER);
         String name = getLastText();
-        skipForce(TokenType.ASSIGNFLEX);
+        skipForce(TokenType.ASSIGN_FLEX);
         Expression e1 = add();
         if (skip(TokenType.DOTS)) {
             Expression e2 = add();
@@ -168,6 +175,7 @@ public class Parser {
     private Expression postfix() throws ParseException {
         Expression p = primary();
         if (skip(TokenType.LB)) {
+            expected(TokenType.IDENTIFIER, TokenType.NUMBER, TokenType.LB, TokenType.MINUS, TokenType.RB);
             if (skip(TokenType.RB)) {
                 return new FunctionCall(p);
             } else {
@@ -185,7 +193,7 @@ public class Parser {
         result.add(add());
         ;
         while (!skip(TokenType.RB)) {
-            expected(TokenType.COMMA, TokenType.RB);
+            expected(TokenType.MINUS, TokenType.PLUS, TokenType.MULT, TokenType.DIV, TokenType.MOD, TokenType.POW, TokenType.FACTORIAL, TokenType.LB, TokenType.COMMA, TokenType.RB);
             skipForce(TokenType.COMMA);
             result.add(add());
         }
@@ -202,6 +210,7 @@ public class Parser {
         }
         skipForce(TokenType.LB);
         Expression inner = add();
+        expected(TokenType.MINUS, TokenType.PLUS, TokenType.MULT, TokenType.DIV, TokenType.MOD, TokenType.POW, TokenType.FACTORIAL, TokenType.LB, TokenType.RB);
         skipForce(TokenType.RB);
         return inner;
     }

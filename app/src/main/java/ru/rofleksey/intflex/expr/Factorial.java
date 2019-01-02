@@ -15,7 +15,7 @@ public class Factorial extends Expression {
         this.child = child;
     }
 
-    private BigDecimal factorial(BigDecimal n, IntFlexContext context) throws IntFlexError {
+    public static BigDecimal factorial(BigDecimal n, IntFlexContext context) throws IntFlexError {
         context.checkInterrupt();
         return n.compareTo(BigDecimal.ZERO) <= 0 ? BigDecimal.ONE : n.multiply(factorial(n.subtract(BigDecimal.ONE), context));
     }

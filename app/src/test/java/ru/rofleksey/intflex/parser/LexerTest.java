@@ -35,7 +35,7 @@ public class LexerTest {
     public void testBasic() {
         testSuccess("a := 1",
                 new Token(TokenType.IDENTIFIER, "a", 0, 0),
-                new Token(TokenType.ASSIGNFLEX, ":=", 0, 2),
+                new Token(TokenType.ASSIGN_FLEX, ":=", 0, 2),
                 new Token(TokenType.NUMBER, "1", 0, 5),
                 new Token(TokenType.EOF, "", 0, 6));
     }
@@ -55,6 +55,7 @@ public class LexerTest {
                 new Token(TokenType.NUMBER, "5", 0, 11),
                 new Token(TokenType.DIV, "/", 0, 12),
                 new Token(TokenType.LB, "(", 0, 13),
+                new Token(TokenType.LINE_BREAK, "\n", 1, -1),
                 new Token(TokenType.NUMBER, "65", 1, 0),
                 new Token(TokenType.MOD, "%", 1, 2),
                 new Token(TokenType.NUMBER, "4", 1, 3),
@@ -78,7 +79,9 @@ public class LexerTest {
     public void testLines() {
         testSuccess("a\n:=\n1",
                 new Token(TokenType.IDENTIFIER, "a", 0, 0),
-                new Token(TokenType.ASSIGNFLEX, ":=", 1, 0),
+                new Token(TokenType.LINE_BREAK, "\n", 1, -1),
+                new Token(TokenType.ASSIGN_FLEX, ":=", 1, 0),
+                new Token(TokenType.LINE_BREAK, "\n", 2, -1),
                 new Token(TokenType.NUMBER, "1", 2, 0),
                 new Token(TokenType.EOF, "", 2, 1));
     }
@@ -92,7 +95,11 @@ public class LexerTest {
     @Test
     public void testContainsEmptyLines() {
         testSuccess("\n\n    a    \n\n",
+                new Token(TokenType.LINE_BREAK, "\n", 1, -1),
+                new Token(TokenType.LINE_BREAK, "\n", 2, -1),
                 new Token(TokenType.IDENTIFIER, "a", 2, 4),
+                new Token(TokenType.LINE_BREAK, "\n", 3, -1),
+                new Token(TokenType.LINE_BREAK, "\n", 4, -1),
                 new Token(TokenType.EOF, "", 4, 0));
     }
 
@@ -104,5 +111,10 @@ public class LexerTest {
     @Test
     public void testError2() {
         testFail("5*$", "Invalid input at line = 1 at pos = 3");
+    }
+
+    @Test
+    public void testError3() {
+        testFail("5*\n5$", "Invalid input at line = 2 at pos = 2");
     }
 }

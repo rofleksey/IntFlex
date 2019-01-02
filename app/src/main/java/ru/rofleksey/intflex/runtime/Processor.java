@@ -10,6 +10,7 @@ import ru.rofleksey.intflex.expr.ExpressionDeclaration;
 import ru.rofleksey.intflex.expr.RangeDeclaration;
 import ru.rofleksey.intflex.expr.Show;
 import ru.rofleksey.intflex.runtime.error.IntFlexError;
+import ru.rofleksey.intflex.runtime.namespaces.Injectors;
 
 public class Processor {
     final ArrayList<ExpressionDeclaration> exprs;
@@ -115,6 +116,7 @@ public class Processor {
     void execute() throws ProcessError, IntFlexError {
         validate();
         IntFlexContext context = new IntFlexContext(sort());
+        new Injectors().inject(context);
         context.run();
         callback.onDone(context.getResult());
     }

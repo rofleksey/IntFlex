@@ -130,7 +130,7 @@ public class ParserTest {
 
     @Test
     public void testMultiple() {
-        testSuccess("n := 100 i := 0..n @i", "n := 100", "i := 0..n", "@i");
+        testSuccess("n := 100\n i := 0..n \n@i", "n := 100", "i := 0..n", "@i");
     }
 
     //ERRORS
@@ -142,73 +142,93 @@ public class ParserTest {
 
     @Test
     public void testVarOnly() {
-        testFail("a", "Mismatched token EOF. Token types [ASSIGNFLEX] expected at line = 1 at pos = 2");
+        testFail("a", "Mismatched token EOF. Token types [:=] expected at line = 1 at pos = 2");
     }
 
     @Test
     public void testAssignFlex() {
-        testFail("a:=", "Mismatched token EOF. Token types [IDENTIFIER, NUMBER, LB, MINUS] expected at line = 1 at pos = 4");
+        testFail("a:=", "Mismatched token EOF. Token types [Var, Num, (, -] expected at line = 1 at pos = 4");
     }
 
     @Test
     public void testAssignOp() {
-        testFail("a := 1*", "Mismatched token EOF. Token types [IDENTIFIER, NUMBER, LB, MINUS] expected at line = 1 at pos = 8");
+        testFail("a := 1*", "Mismatched token EOF. Token types [Var, Num, (, -] expected at line = 1 at pos = 8");
+    }
+
+    @Test
+    public void testBracket() {
+        testFail("a := 1*(", "Mismatched token EOF. Token types [Var, Num, (, -] expected at line = 1 at pos = 9");
+    }
+
+    @Test
+    public void testBracketAndInside() {
+        testFail("a := 1*(a", "Mismatched token EOF. Token types [-, +, *, /, %, ^, !, (, )] expected at line = 1 at pos = 10");
+    }
+
+    @Test
+    public void testBracketOpenClose() {
+        testFail("a := 1*(a*(1+2)", "Mismatched token EOF. Token types [-, +, *, /, %, ^, !, (, )] expected at line = 1 at pos = 16");
+    }
+
+    @Test
+    public void testBracketStange() {
+        testFail("a := 19*o(", "Mismatched token EOF. Token types [Var, Num, (, -, )] expected at line = 1 at pos = 11");
     }
 
     @Test
     public void testMissingComma() {
-        testFail("a := a(b", "Mismatched token EOF. Token types [COMMA, RB] expected at line = 1 at pos = 9");
+        testFail("a := a(b", "Mismatched token EOF. Token types [-, +, *, /, %, ^, !, (, ,, )] expected at line = 1 at pos = 9");
     }
 
     @Test
     public void testMissingArg() {
-        testFail("a := c(1,", "Mismatched token EOF. Token types [IDENTIFIER, NUMBER, LB, MINUS] expected at line = 1 at pos = 10");
+        testFail("a := c(1,", "Mismatched token EOF. Token types [Var, Num, (, -] expected at line = 1 at pos = 10");
     }
 
     @Test
     public void testRangePartial() {
-        testFail("a := 0..", "Mismatched token EOF. Token types [IDENTIFIER, NUMBER, LB, MINUS] expected at line = 1 at pos = 9");
+        testFail("a := 0..", "Mismatched token EOF. Token types [Var, Num, (, -] expected at line = 1 at pos = 9");
     }
 
     @Test
     public void testRangeOver() {
-        testFail("a := 0..1..2", "Mismatched token DOTS. Token types [EOF, AT, IDENTIFIER, MINUS, PLUS, MULT, DIV, MOD, FACTORIAL, LB, COMMA] expected at line = 1 at pos = 10");
+        testFail("a := 0..1..2", "Mismatched token ... Token types [EOF, line, -, +, *, /, %, ^, !, (, ,] expected at line = 1 at pos = 10");
     }
 
     @Test
     public void testAt() {
-        testFail("@", "Mismatched token EOF. Token types [IDENTIFIER] expected at line = 1 at pos = 2");
+        testFail("@", "Mismatched token EOF. Token types [Var] expected at line = 1 at pos = 2");
     }
 
     @Test
     public void testAtInvalid() {
-        testFail("@1", "Mismatched token NUMBER. Token types [IDENTIFIER] expected at line = 1 at pos = 2");
+        testFail("@1", "Mismatched token Num. Token types [Var] expected at line = 1 at pos = 2");
     }
 
     //PARTIAL
 
     @Test
     public void testPostEmpty() {
-        testFail("~", "Mismatched token POTENTIAL. Token types [AT, IDENTIFIER] expected at line = 1 at pos = 1");
+        testFail("_", "Mismatched token _. Token types [@, Var] expected at line = 1 at pos = 1");
     }
 
     @Test
     public void testPostAll() {
-        testFail("a := f(1)~", "Mismatched token POTENTIAL. Token types [EOF, AT, IDENTIFIER, MINUS, PLUS, MULT, DIV, MOD, FACTORIAL, LB, DOTS] expected at line = 1 at pos = 10");
+        testFail("a := f(1)_", "Mismatched token _. Token types [EOF, line, -, +, *, /, %, ^, !, (, ..] expected at line = 1 at pos = 10");
     }
 
     @Test
     public void testPostShow() {
-        testFail("@a~", "Mismatched token POTENTIAL. Token types [EOF, AT, IDENTIFIER, MINUS, PLUS, MULT, DIV, MOD, FACTORIAL, LB] expected at line = 1 at pos = 3");
+        testFail("@a_", "Mismatched token _. Token types [EOF, line] expected at line = 1 at pos = 3");
     }
 
     @Test
     public void testPostRange() {
-        testFail("a := 1..2~", "Mismatched token POTENTIAL. Token types [EOF, AT, IDENTIFIER, MINUS, PLUS, MULT, DIV, MOD, FACTORIAL, LB, COMMA] expected at line = 1 at pos = 10");
+        testFail("a := 1..2_", "Mismatched token _. Token types [EOF, line, -, +, *, /, %, ^, !, (, ,] expected at line = 1 at pos = 10");
     }
 
     @Test
     public void testPostRangeWithStep() {
-        testFail("a := 1..2,3~", "Mismatched token POTENTIAL. Token types [EOF, AT, IDENTIFIER, MINUS, PLUS, MULT, DIV, MOD, FACTORIAL, LB] expected at line = 1 at pos = 12");
+        testFail("a := 1..2,3_", "Mismatched token _. Token types [EOF, line, -, +, *, /, %, ^, !, (] expected at line = 1 at pos = 12");
     }
 }
