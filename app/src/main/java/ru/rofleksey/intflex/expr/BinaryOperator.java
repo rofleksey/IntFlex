@@ -25,11 +25,18 @@ public abstract class BinaryOperator extends Expression {
 
     abstract BigDecimal combine(BigDecimal l, BigDecimal r) throws IntFlexError;
 
+    abstract String getOpString();
+
     @Override
     public Set<String> calcDependencies() {
         HashSet<String> set = new HashSet<>();
         set.addAll(left.getDependencies());
         set.addAll(right.getDependencies());
         return set;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + left + getOpString() + right + ")";
     }
 }

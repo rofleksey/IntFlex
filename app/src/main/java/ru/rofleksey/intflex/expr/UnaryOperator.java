@@ -9,7 +9,7 @@ import ru.rofleksey.intflex.runtime.type.IntFlexNum;
 import ru.rofleksey.intflex.runtime.type.IntFlexObject;
 
 public abstract class UnaryOperator extends Expression {
-    private Expression child;
+    Expression child;
 
     UnaryOperator(Expression child) {
         this.child = child;
@@ -23,8 +23,15 @@ public abstract class UnaryOperator extends Expression {
 
     abstract BigDecimal combine(BigDecimal c) throws IntFlexError;
 
+    abstract String getOpString();
+
     @Override
     public Set<String> calcDependencies() {
         return child.getDependencies();
+    }
+
+    @Override
+    public String toString() {
+        return getOpString() + "(" + child + ")";
     }
 }

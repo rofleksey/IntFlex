@@ -58,23 +58,17 @@ public class IntFlexContext {
         }
     }
 
-    public int getLine() {
-        //TODO: implement
-        return 0;
-    }
-
-    public int getPos() {
-        //TODO: implement
-        return 0;
-    }
-
     public void enterNext() throws IntFlexError {
-        execIter++;
-        execOrder.get(execIter).execute(this);
-        execIter--;
+        if (execIter + 1 < execOrder.size()) {
+            execIter++;
+            execOrder.get(execIter).execute(this);
+            execIter--;
+        }
     }
 
     public void run() throws IntFlexError {
-        execOrder.get(0).execute(this);
+        if (!execOrder.isEmpty()) {
+            execOrder.get(0).execute(this);
+        }
     }
 }

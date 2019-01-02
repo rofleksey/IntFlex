@@ -25,4 +25,9 @@ public class Var extends Expression {
         set.add(name);
         return set;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

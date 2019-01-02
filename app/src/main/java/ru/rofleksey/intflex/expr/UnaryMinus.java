@@ -13,4 +13,9 @@ public class UnaryMinus extends UnaryOperator {
     BigDecimal combine(BigDecimal c) throws IntFlexError {
         return c.negate();
     }
+
+    @Override
+    String getOpString() {
+        return "-";
+    }
 }

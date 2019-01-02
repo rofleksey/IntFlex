@@ -15,19 +15,25 @@ public class Factorial extends Expression {
         this.child = child;
     }
 
-    private BigDecimal factorial(BigDecimal n) {
-        return n.compareTo(BigDecimal.ZERO) <= 0 ? BigDecimal.ONE : n.multiply(factorial(n.subtract(BigDecimal.ONE)));
+    private BigDecimal factorial(BigDecimal n, IntFlexContext context) throws IntFlexError {
+        context.checkInterrupt();
+        return n.compareTo(BigDecimal.ZERO) <= 0 ? BigDecimal.ONE : n.multiply(factorial(n.subtract(BigDecimal.ONE), context));
     }
 
     @Override
     public IntFlexObject calc(IntFlexContext context) throws IntFlexError {
         context.checkInterrupt();
         BigDecimal dec = child.calc(context).toNum();
-        return new IntFlexNum(factorial(dec));
+        return new IntFlexNum(factorial(dec, context));
     }
 
     @Override
     public Set<String> calcDependencies() {
         return child.getDependencies();
+    }
+
+    @Override
+    public String toString() {
+        return "(" + child + ")!";
     }
 }

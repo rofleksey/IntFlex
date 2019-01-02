@@ -40,4 +40,18 @@ public class FunctionCall extends Expression {
         }
         return set;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(what).append("(");
+        if (!args.isEmpty()) {
+            b.append(args.get(0));
+            for (int i = 1; i < args.size(); i++) {
+                b.append(", ").append(args.get(i));
+            }
+        }
+        b.append(")");
+        return b.toString();
+    }
 }

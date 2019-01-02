@@ -26,19 +26,10 @@ public class Show extends Dependable implements Declaration {
     }
 
     @Override
-    public boolean isRange() {
-        return false;
-    }
-
-    @Override
-    public Range getRange() {
-        return null;
-    }
-
-    @Override
     public void execute(IntFlexContext context) throws IntFlexError {
         context.checkInterrupt();
         context.addToResult(context.get(link));
+        context.enterNext();
     }
 
     @Override
@@ -46,5 +37,10 @@ public class Show extends Dependable implements Declaration {
         HashSet<String> s = new HashSet<>();
         s.add(link);
         return s;
+    }
+
+    @Override
+    public String toString() {
+        return "@" + link;
     }
 }

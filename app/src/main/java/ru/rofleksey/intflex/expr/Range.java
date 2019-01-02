@@ -51,4 +51,9 @@ public class Range extends Dependable {
             cur = cur.add(s);
         }
     }
+
+    @Override
+    public String toString() {
+        return from + ".." + to + (step == null ? "" : "," + step);
+    }
 }

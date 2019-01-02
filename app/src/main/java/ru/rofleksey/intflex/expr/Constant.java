@@ -23,4 +23,9 @@ public class Constant extends Expression {
     public Set<String> calcDependencies() {
         return new HashSet<>();
     }
+
+    @Override
+    public String toString() {
+        return computed.toString();
+    }
 }

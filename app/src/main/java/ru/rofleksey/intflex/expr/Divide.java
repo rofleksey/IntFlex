@@ -11,4 +11,9 @@ public class Divide extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.divide(r, BigDecimal.ROUND_HALF_UP);
     }
+
+    @Override
+    String getOpString() {
+        return "/";
+    }
 }

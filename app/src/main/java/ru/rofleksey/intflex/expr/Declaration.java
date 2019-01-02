@@ -8,9 +8,5 @@ public interface Declaration {
 
     Dependable getDependable();
 
-    boolean isRange();
-
-    Range getRange();
-
     void execute(IntFlexContext context) throws IntFlexError;
 }

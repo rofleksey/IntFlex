@@ -11,4 +11,9 @@ public class Subtract extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.subtract(r);
     }
+
+    @Override
+    String getOpString() {
+        return "-";
+    }
 }

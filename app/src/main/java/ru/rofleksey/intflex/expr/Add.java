@@ -11,4 +11,9 @@ public class Add extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.add(r);
     }
+
+    @Override
+    String getOpString() {
+        return "+";
+    }
 }

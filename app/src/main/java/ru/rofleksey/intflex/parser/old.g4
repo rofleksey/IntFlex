@@ -1,4 +1,4 @@
-grammar IntFlex;
+grammar old;
 
 @header {
 import ru.rofleksey.intflex.expr.*;
@@ -22,21 +22,9 @@ statementList
     ;
 
 declaration
-    : rangeDeclaration
-    | expressionDeclaration
-    | showDeclaration
-    ;
-
-showDeclaration
-    :  At name=Identifier {shows.add(new Show($name.text, showNum++));}
-    ;
-
-expressionDeclaration
-    :  name=Identifier FlexAssign e2=additiveExpression {calcs.add(new ExpressionDeclaration($name.text, $e2.expr));}
-    ;
-
-rangeDeclaration
-    : name=Identifier FlexAssign r=range {ranges.add(new RangeDeclaration($name.text, $r.r));}
+    : name=Identifier Assign r=range {ranges.add(new RangeDeclaration($name.text, $r.r));}
+    | name=Identifier FlexAssign e2=additiveExpression {calcs.add(new ExpressionDeclaration($name.text, $e2.expr));}
+    |  At name=Identifier {shows.add(new Show($name.text, showNum++));}
     ;
 
 range returns [Range r]
@@ -106,7 +94,10 @@ Div : '/';
 Mod : '%';
 Comma : ',';
 
+Assign: '=';
 FlexAssign: ':=';
+
+SpecialSymb: '$';
 
 Identifier
     :   IdentifierNondigit
@@ -138,12 +129,6 @@ Constant
 fragment
 DecimalConstant
     :   Digit+
-    ;
-
-
-fragment
-HexadecimalPrefix
-    :   '0' [xX]
     ;
 
 fragment

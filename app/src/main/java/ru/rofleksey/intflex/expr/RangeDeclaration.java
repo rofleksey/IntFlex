@@ -23,17 +23,12 @@ public class RangeDeclaration implements Declaration {
     }
 
     @Override
-    public boolean isRange() {
-        return true;
-    }
-
-    @Override
-    public Range getRange() {
-        return range;
-    }
-
-    @Override
     public void execute(IntFlexContext context) throws IntFlexError {
         range.iterate(name, context);
+    }
+
+    @Override
+    public String toString() {
+        return name + " := " + range;
     }
 }

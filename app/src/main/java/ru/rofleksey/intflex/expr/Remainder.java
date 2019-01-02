@@ -11,4 +11,9 @@ public class Remainder extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.remainder(r);
     }
+
+    @Override
+    String getOpString() {
+        return "%";
+    }
 }

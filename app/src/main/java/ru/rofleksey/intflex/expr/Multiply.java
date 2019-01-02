@@ -11,4 +11,9 @@ public class Multiply extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.multiply(r);
     }
+
+    @Override
+    String getOpString() {
+        return "*";
+    }
 }

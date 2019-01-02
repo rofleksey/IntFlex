@@ -11,4 +11,9 @@ public class Power extends BinaryOperator {
     BigDecimal combine(BigDecimal l, BigDecimal r) {
         return l.pow(r.intValue());
     }
+
+    @Override
+    String getOpString() {
+        return "^";
+    }
 }

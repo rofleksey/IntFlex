@@ -23,19 +23,14 @@ public class ExpressionDeclaration implements Declaration {
     }
 
     @Override
-    public boolean isRange() {
-        return false;
-    }
-
-    @Override
-    public Range getRange() {
-        return null;
-    }
-
-    @Override
     public void execute(IntFlexContext context) throws IntFlexError {
         context.checkInterrupt();
         context.put(name, expr.calc(context));
         context.enterNext();
+    }
+
+    @Override
+    public String toString() {
+        return name + " := " + expr;
     }
 }

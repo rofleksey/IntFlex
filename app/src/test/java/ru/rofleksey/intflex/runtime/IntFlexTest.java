@@ -6,6 +6,12 @@ import org.junit.Test;
 public class IntFlexTest {
 
     @Test
+    public void testEmpty() {
+        IntFlex.executeSync("",
+                new SuccessCallback("[]"));
+    }
+
+    @Test
     public void testLinear() {
         IntFlex.executeSync("i := 0..10 @i",
                 new SuccessCallback("[({i=0}, 0), ({i=1}, 1), ({i=2}, 2), ({i=3}, 3), ({i=4}, 4), ({i=5}, 5), ({i=6}, 6), ({i=7}, 7), ({i=8}, 8), ({i=9}, 9), ({i=10}, 10)]"));
@@ -48,9 +54,27 @@ public class IntFlexTest {
     }
 
     @Test
+    public void testRangeNegative() {
+        IntFlex.executeSync("i := 5..0 @i",
+                new SuccessCallback("[]"));
+    }
+
+    @Test
     public void testRangeStepNegative() {
         IntFlex.executeSync("i := 9..1,-4 @i",
                 new SuccessCallback("[({i=9}, 9), ({i=5}, 5), ({i=1}, 1)]"));
+    }
+
+    @Test
+    public void testNoShows() {
+        IntFlex.executeSync("i := 100",
+                new SuccessCallback("[]"));
+    }
+
+    @Test
+    public void testMultipleShows() {
+        IntFlex.executeSync("i := 0..4 j := i^2 @i @j",
+                new SuccessCallback("[({i=0, j=0}, 0), ({i=0, j=0}, 0), ({i=1, j=1}, 1), ({i=1, j=1}, 1), ({i=2, j=4}, 2), ({i=2, j=4}, 4), ({i=3, j=9}, 3), ({i=3, j=9}, 9), ({i=4, j=16}, 4), ({i=4, j=16}, 16)]"));
     }
 
     @Test
@@ -67,27 +91,6 @@ public class IntFlexTest {
         callback.assertError();
     }
 
-    //TODO: multiple shows
-
-    /*@Test
-    public void invalidRange() {
-        IntFlex.executeSync("i := 0..0 \n @i", new IntFlex.IntFlexCallback() {
-            @Override
-            public void onDone(Result result) {
-
-            }
-
-            @Override
-            public void onPercentage(float percent) {
-
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }*/
 
     @Test
     public void cycleSelf() {
